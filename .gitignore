@@ -9,21 +9,39 @@ app/build/
 *.iml
 .externalNativeBuild/
 .cxx/
+*.hprof
 
-# IDE
+# 依赖与本地环境
+local.properties
+.gradle-cache/
+
+# IDE / 编辑器
 /.idea/
+/.vscode/
+/.fleet/
+*.swp
+*~
 
 # 本地配置与签名材料（绝不提交）
-local.properties
 keystore.properties
 /.signing/
 *.keystore
 *.jks
 
-# 发布产物：APK 体积大，仅保留 source 包入库
+# 安装包：体积大，仅保留 source 包入库（需要分发时走 GitHub Releases）
+*.apk
+*.aab
 outputs/*-debug.apk
 outputs/*-release.apk
+
+# 临时文件
+*.log
+*.tmp
+*.bak
+*.orig
+*.rej
 
 # 系统文件
 .DS_Store
 Thumbs.db
+desktop.ini

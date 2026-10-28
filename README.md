@@ -22,6 +22,7 @@ V3.1.0 是 StudyOS 的**独立版本基线**。从本版本起，代码、构建
 | 数据 | Room 2.6.1 + Preferences DataStore + SAF |
 | 联网 | 无。APK 不包含 `INTERNET` 权限 |
 | 桌面组件 | 今日待办、下一节课（Glance） |
+| Release APK | 28.0 MiB（29,427,174 字节，R8 + 压缩 `.so`） |
 | 测试 | 496 项 JVM 测试，0 失败 |
 
 ---

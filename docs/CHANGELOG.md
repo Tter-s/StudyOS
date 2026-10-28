@@ -5,6 +5,19 @@
 
 ---
 
+## V3.1.0 构建体积优化 — 2026-10-28
+
+**目标**：APK 小于 50 MB，不删减功能、不改变 ABI 支持范围。
+
+- `release` 开启 R8 代码压缩（`isMinifyEnabled = true`）与资源收缩（`isShrinkResources = true`）。
+- 开启 `jniLibs.useLegacyPackaging = true` 压缩原生库；`arm64-v8a`、`armeabi-v7a`、`x86`、`x86_64` 四个 ABI 全部保留。
+- 保留入口：桌面组件/Worker、PDFBox/FontBox、Room 生成实现；补充 ML Kit 可选依赖的 `-dontwarn`。
+- Release APK：**68,949,000 → 29,427,174 字节**（65.8 MiB → 28.0 MiB），下降约 57.3%。
+- 验证：`assembleRelease` 成功；`apksigner verify` v2=true、v3=true；`aapt dump badging` 仍为 versionCode 31 / versionName 3.1.0 / minSdk 26 / targetSdk 35，权限保持不变；4 个 ABI、ML Kit 模型（25 个条目）、KaTeX、PDFBox 资源与两个组件资源均在包内。
+- 说明：R8 仅影响 release 构建；debug 构建与全部 496 项单元测试不受影响。
+
+---
+
 ## V3.1.0 — 2026-10-26
 
 **主题**：只记录生活，不管理人生。

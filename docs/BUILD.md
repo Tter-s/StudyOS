@@ -100,13 +100,38 @@ Verified using v3 scheme (APK Signature Scheme v3): true
 
 ---
 
+## 3.1 体积优化（release）
+
+release 构建启用了三项与功能无关的体积优化：
+
+```kotlin
+buildTypes {
+    release {
+        isMinifyEnabled = true       // R8 代码压缩
+        isShrinkResources = true     // 资源收缩
+        …
+    }
+}
+packaging {
+    jniLibs.useLegacyPackaging = true // 压缩 .so，安装时解压
+}
+```
+
+- **ABI 不变**：`arm64-v8a`、`armeabi-v7a`、`x86`、`x86_64` 四个全部保留。
+- **功能不变**：未删除任何模块；仅对桌面组件/Worker、PDFBox/FontBox、Room 生成实现等反射入口做必要保留。
+- **体积结果**：release APK 从 68,949,000 字节降到 **29,427,174 字节（28.0 MiB）**。
+- **映射文件**：`app/build/outputs/mapping/release/mapping.txt`，用于回溯混淆后的堆栈；不要随 APK 发布。
+- **代价**：首次安装时系统需要解压原生库，安装体积略大于压缩前；运行期行为不变。
+
+---
+
 ## 4. 产物与归档
 
-| 产物 | 构建路径 | 归档路径 |
-| --- | --- | --- |
-| Debug APK | `app/build/outputs/apk/debug/app-debug.apk` | `outputs/StudyOS-V3.1.0-debug.apk` |
-| Release APK | `app/build/outputs/apk/release/app-release.apk` | `outputs/StudyOS-V3.1.0-release.apk` |
-| 源码 ZIP | — | `outputs/StudyOS-V3.1.0-source.zip` |
+| 产物 | 构建路径 | 归档路径 | 当前体积 |
+| --- | --- | --- | --- |
+| Debug APK | `app/build/outputs/apk/debug/app-debug.apk` | `outputs/StudyOS-V3.1.0-debug.apk` | 75.0 MiB |
+| Release APK | `app/build/outputs/apk/release/app-release.apk` | `outputs/StudyOS-V3.1.0-release.apk` | **28.0 MiB** |
+| 源码 ZIP | — | `outputs/StudyOS-V3.1.0-source.zip` | 1.7 MiB |
 
 发布时复制并重命名：
 

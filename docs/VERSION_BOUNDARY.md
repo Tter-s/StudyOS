@@ -63,9 +63,9 @@ D:\studyOS\                         D:\studyOS\V3_1_0\
 | 架构文档 | `README.md`、`docs/ARCHITECTURE.md`、`MODULES.md`、`DATABASE.md`、`BUILD.md`、`VERSION_BOUNDARY.md`、`CHANGELOG.md` | 7 个文件 |
 | 发布说明 | `docs/V3_1_RELEASE_NOTES.md` | 1 个文件 |
 | 文档样例 | `docs/samples/*` | 2 个文件 |
-| 归档产物 | `outputs/StudyOS-V3.1.0-debug.apk`、`-source.zip` | 约 76 MB |
+| 归档产物 | `outputs/StudyOS-V3.1.0-debug.apk`、`StudyOS-V3.1.0-release.apk`（28.0 MiB）、`-source.zip` | 约 105 MB |
 
-合计（不含 `.git`、`app/build`、`.gradle`）：**417 个文件**，其中源码与资源 380 个。
+合计（不含 `.git`、`app/build`、`.gradle`）：**418 个文件**，其中源码与资源 380 个。
 
 ### 3.2 属于 V3.0.0 及以前，保留在 `D:\studyOS`，未改动
 

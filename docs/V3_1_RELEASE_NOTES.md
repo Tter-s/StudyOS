@@ -5,6 +5,8 @@
 数据库：Room v10
 包名：`com.zhixu.studyos`
 
+> 2026-10-28 构建更新：release 启用 R8 + 资源收缩 + 压缩 `.so`，APK 由 65.8 MiB 降至 **28.0 MiB**；四个 ABI 与全部功能保留。详见 `docs/CHANGELOG.md` 的同日条目。
+
 ## 目标
 
 > 只记录生活，不管理人生。

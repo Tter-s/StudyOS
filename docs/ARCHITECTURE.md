@@ -592,7 +592,7 @@ app/build.gradle.kts  android 配置、KSP schema、依赖
 - `buildFeatures`：Compose + BuildConfig
 - `testOptions.unitTests.isIncludeAndroidResources = true`（Robolectric 需要）
 - `packaging.resources.excludes`：`/META-INF/{AL2.0,LGPL2.1}`
-- Release `isMinifyEnabled = false`，保留可读堆栈，便于个人项目排查
+- Release：`isMinifyEnabled = true` + `isShrinkResources = true`，仅保留必要反射入口；同时 `jniLibs.useLegacyPackaging = true` 压缩 `.so`、保留全部 4 个 ABI，安装时由系统解压，功能与兼容性不变
 
 ### 11.2 签名
 
@@ -612,7 +612,7 @@ enableV3Signing = true
 | Debug APK | `app/build/outputs/apk/debug/app-debug.apk` |
 | Release APK | `app/build/outputs/apk/release/app-release.apk` |
 | 归档 Debug | `outputs/StudyOS-V3.1.0-debug.apk`（78,274,101 字节） |
-| 归档 Release | `outputs/StudyOS-V3.1.0-release.apk`（68,949,000 字节） |
+| 归档 Release | `outputs/StudyOS-V3.1.0-release.apk`（29,427,174 字节，28.0 MiB） |
 | 源码归档 | `outputs/StudyOS-V3.1.0-source.zip` |
 
 ---

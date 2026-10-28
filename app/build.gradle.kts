@@ -47,7 +47,9 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            // 体积优化：R8 代码压缩 + 资源收缩；不删除任何业务模块或功能。
+            isMinifyEnabled = true
+            isShrinkResources = true
             if (hasReleaseSigning) {
                 signingConfig = signingConfigs.getByName("release")
             }
@@ -80,6 +82,8 @@ android {
 
     packaging {
         resources.excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        // 压缩 .so：仍保留全部 ABI，安装时由系统解压，功能与兼容性不变。
+        jniLibs.useLegacyPackaging = true
     }
 }
 

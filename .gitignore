@@ -2,6 +2,7 @@
 
 # 构建产物
 .gradle/
+.kotlin/
 build/
 app/build/
 /captures/

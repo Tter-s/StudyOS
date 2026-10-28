@@ -118,6 +118,15 @@ gradlew / gradlew.bat       ✓
 settings.gradle.kts         ✓
 ```
 
+独立构建验证（在 `V3_1_0` 目录内执行）：
+
+```text
+:app:compileDebugKotlin   BUILD SUCCESSFUL
+:app:testDebugUnitTest    496 tests, 0 failures, 0 errors, 0 skipped
+```
+
+说明：测试结果来自本目录 `app/build/test-results/testDebugUnitTest` 的 87 个测试套件汇总，不是引用上级目录的报告。
+
 ---
 
 ## 5. 后续维护规则

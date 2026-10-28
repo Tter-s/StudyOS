@@ -72,7 +72,7 @@ V3.1.0 的架构不是“功能越多越好”，而是围绕五条硬约束做�
 ├──────────────────────────────────────────────────────────────┤
 │ 持久化  Room DAO → SQLite（studyos.db）                       │
 │  Preferences DataStore（主题等） / SAF（备份文件）             │
-│  filesDir（课表原图、题库文档、恢复日志）                      │
+│  filesDir（题库文档、恢复日志）                                │
 ├──────────────────────────────────────────────────────────────┤
 │ 平台层  Application / MainActivity / AppContainer / Glance     │
 └──────────────────────────────────────────────────────────────┘
@@ -450,7 +450,7 @@ interface BackupService {
 | --- | --- | --- |
 | Preferences DataStore | 主题、旧版提醒开关等偏好 | `UserPreferencesRepository` |
 | SAF / ContentResolver | 用户选择的备份 ZIP、CSV 导出 | `AppFileStore` / `FinanceDocumentStore` |
-| `filesDir` | 课表原图、题库文档、恢复日志 | 服务内部 |
+| `filesDir` | 题库文档、恢复日志 | 服务内部 |
 
 不申请存储权限，所有用户文件通过系统文件选择器读写。
 

@@ -1,5 +1,5 @@
-# 大体积构建产物：不上传远端，仅保留本地
-outputs/*.apk
+# 仅保留 release 包在本地，不入库
+outputs/*-release.apk
 
 # 签名与本地配置
 *.keystore

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">知序 StudyOS</string>
+    <string name="nav_home">今日</string>
+    <string name="nav_schedule">课表</string>
+    <string name="nav_study">学习</string>
+    <string name="nav_records">记录</string>
+    <string name="nav_finance">财务</string>
+    <string name="nav_profile">我的</string>
+    <string name="widget_today_tasks_description">今日待办：完成进度与下一项</string>
+    <string name="widget_next_class_description">下一节课：课程、教室和开始时间</string>
+</resources>

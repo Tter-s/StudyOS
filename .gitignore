@@ -1,7 +1,28 @@
-# 仅保留 release 包在本地，不入库
+# V3.1.0 独立工程（自 V3.1.0 起单独维护，不再与 V3.0.0 及更早版本共享工作区）
+
+# 构建产物
+.gradle/
+build/
+app/build/
+/captures/
+*.iml
+.externalNativeBuild/
+.cxx/
+
+# IDE
+/.idea/
+
+# 本地配置与签名材料（绝不提交）
+local.properties
+keystore.properties
+/.signing/
+*.keystore
+*.jks
+
+# 发布产物：APK 体积大，仅保留 source 包入库
+outputs/*-debug.apk
 outputs/*-release.apk
 
-# 签名与本地配置
-*.keystore
-keystore.properties
-local.properties
+# 系统文件
+.DS_Store
+Thumbs.db

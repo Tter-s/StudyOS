@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 自适应图标前景：白色书页 + 蓝色对勾，内容保持在 66dp 安全区内。 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- 后页：浅蓝，露出右侧与下方边缘 -->
+    <path
+        android:fillColor="#AEC6FF"
+        android:pathData="M48,30 h28 a10,10 0 0 1 10,10 v34 a10,10 0 0 1 -10,10 h-28 a10,10 0 0 1 -10,-10 v-34 a10,10 0 0 1 10,-10 z" />
+    <!-- 前页：白色圆角页面 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M34,24 h28 a10,10 0 0 1 10,10 v34 a10,10 0 0 1 -10,10 h-28 a10,10 0 0 1 -10,-10 v-34 a10,10 0 0 1 10,-10 z" />
+    <!-- 两条内容线 -->
+    <path
+        android:fillColor="#315DA8"
+        android:pathData="M36,40 h24 a2.5,2.5 0 0 1 0,5 h-24 a2.5,2.5 0 0 1 0,-5 z" />
+    <path
+        android:fillColor="#315DA8"
+        android:pathData="M36,51 h18 a2.5,2.5 0 0 1 0,5 h-18 a2.5,2.5 0 0 1 0,-5 z" />
+    <!-- 对勾：表示任务完成 -->
+    <path
+        android:pathData="M37,67 L45,75 L59,59"
+        android:strokeColor="#315DA8"
+        android:strokeWidth="6"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+</vector>

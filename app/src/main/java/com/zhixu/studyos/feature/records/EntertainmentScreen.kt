@@ -49,13 +49,10 @@ fun EntertainmentScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
-    var hoursInput by remember(state.date) { mutableStateOf("0") }
     var minutesInput by remember(state.date) { mutableStateOf("0") }
 
     LaunchedEffect(state.date, state.minutes) {
-        val total = state.minutes ?: 0
-        hoursInput = (total / 60).toString()
-        minutesInput = (total % 60).toString()
+        minutesInput = (state.minutes ?: 0).toString()
     }
     LaunchedEffect(state.notice) {
         state.notice?.let {
@@ -98,36 +95,20 @@ fun EntertainmentScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Spacer(Modifier.height(12.dp))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                ) {
-                    OutlinedTextField(
-                        value = hoursInput,
-                        onValueChange = { value ->
-                            hoursInput = value.filter(Char::isDigit).take(2)
-                        },
-                        label = { Text("小时") },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier
-                            .weight(1f)
-                            .testTag("entertainment_hours"),
-                    )
-                    OutlinedTextField(
-                        value = minutesInput,
-                        onValueChange = { value ->
-                            minutesInput = value.filter(Char::isDigit).take(2)
-                        },
-                        label = { Text("分钟") },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier
-                            .weight(1f)
-                            .testTag("entertainment_minutes"),
-                    )
-                }
-                val total = (hoursInput.toIntOrNull() ?: 0) * 60 + (minutesInput.toIntOrNull() ?: 0)
+                OutlinedTextField(
+                    value = minutesInput,
+                    onValueChange = { value ->
+                        minutesInput = value.filter(Char::isDigit).take(4)
+                    },
+                    label = { Text("今天玩了多久（分钟）") },
+                    placeholder = { Text("例如 90") },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("entertainment_minutes"),
+                )
+                val total = minutesInput.toIntOrNull() ?: 0
                 Spacer(Modifier.height(8.dp))
                 Text(
                     text = "合计 ${formatDuration(total.toLong())}",
@@ -139,10 +120,7 @@ fun EntertainmentScreen(
                     PrimaryButton(
                         text = "保存",
                         onClick = {
-                            viewModel.save(
-                                hours = hoursInput.toIntOrNull() ?: 0,
-                                minutes = minutesInput.toIntOrNull() ?: 0,
-                            )
+                            viewModel.save(hours = total / 60, minutes = total % 60)
                         },
                         modifier = Modifier.testTag("entertainment_save"),
                     )

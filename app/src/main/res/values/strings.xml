@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">知序 StudyOS</string>
     <string name="nav_home">今日</string>
-    <string name="nav_schedule">课表</string>
+    <string name="nav_schedule">时间分布</string>
     <string name="nav_study">学习</string>
     <string name="nav_records">记录</string>
     <string name="nav_finance">财务</string>

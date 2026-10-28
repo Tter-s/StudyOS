@@ -15,11 +15,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.Bedtime
-import androidx.compose.material.icons.rounded.EditNote
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.SportsEsports
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,12 +35,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zhixu.studyos.core.designsystem.component.AppCard
 import com.zhixu.studyos.core.designsystem.component.PageTitle
 import com.zhixu.studyos.core.designsystem.component.chineseDateWithWeekday
-import com.zhixu.studyos.core.model.MAX_ENTERTAINMENT_MINUTES
 
 @Composable
 fun RecordsScreen(
     viewModel: RecordsHubViewModel,
-    onOpenSummary: () -> Unit,
     onOpenSleep: () -> Unit,
     onOpenEntertainment: () -> Unit,
     onOpenHistory: () -> Unit,
@@ -59,15 +57,56 @@ fun RecordsScreen(
             subtitle = state.date.chineseDateWithWeekday(),
         )
 
-        AppCard(modifier = Modifier.fillMaxWidth()) {
-            RecordEntry(
-                icon = Icons.Rounded.EditNote,
-                title = "每日总结",
-                value = state.summary?.replace('\n', ' ') ?: "还没有写今天做了什么",
-                onClick = onOpenSummary,
-                testTag = "records_summary",
+        AppCard(
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag("records_progress"),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "今日完成",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = "${state.completedCount} / ${state.totalCount}",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                }
+                Text(
+                    text = when {
+                        state.totalCount == 0 -> "今天还没有待办"
+                        state.completedCount == state.totalCount -> "全部完成"
+                        else -> "还剩 ${state.totalCount - state.completedCount} 件"
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Spacer(Modifier.height(12.dp))
+            LinearProgressIndicator(
+                progress = {
+                    if (state.totalCount == 0) {
+                        0f
+                    } else {
+                        state.completedCount.toFloat() / state.totalCount
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(8.dp),
+                trackColor = MaterialTheme.colorScheme.surfaceVariant,
             )
-            HorizontalDivider(color = MaterialTheme.colorScheme.outline)
+        }
+
+        AppCard(modifier = Modifier.fillMaxWidth()) {
             RecordEntry(
                 icon = Icons.Rounded.Bedtime,
                 title = "睡眠记录",

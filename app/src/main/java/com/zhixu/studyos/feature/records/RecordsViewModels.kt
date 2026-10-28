@@ -44,6 +44,8 @@ data class RecordsHubUiState(
     val summary: String? = null,
     val entertainmentMinutes: Int? = null,
     val lastSleep: SleepRecord? = null,
+    val completedCount: Int = 0,
+    val totalCount: Int = 0,
     val isLoading: Boolean = true,
 ) {
     val lastSleepMinutes: Long? get() = lastSleep?.durationMinutes
@@ -60,7 +62,8 @@ class RecordsHubViewModel(
         repository.observeSummary(today),
         repository.observeEntertainment(today),
         sleepRepository.observeSnapshot(),
-    ) { summary, entertainment, sleep ->
+        repository.observeTasks(today),
+    ) { summary, entertainment, sleep, tasks ->
         RecordsHubUiState(
             date = today,
             summary = summary?.takeIf { it.isNotBlank() },
@@ -68,6 +71,8 @@ class RecordsHubViewModel(
             lastSleep = sleep.records.firstOrNull {
                 (it.date == today || it.date == today.minusDays(1)) && it.durationMinutes != null
             },
+            completedCount = tasks.count { it.isCompleted },
+            totalCount = tasks.size,
             isLoading = false,
         )
     }.stateIn(
@@ -75,76 +80,6 @@ class RecordsHubViewModel(
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = RecordsHubUiState(date = today),
     )
-}
-
-// ---------------- 每日总结 ----------------
-
-data class DailySummaryUiState(
-    val date: LocalDate,
-    val tasks: List<DailyTask> = emptyList(),
-    val summary: String = "",
-    val notice: String? = null,
-    val isLoading: Boolean = true,
-) {
-    val total: Int get() = tasks.size
-    val completed: Int get() = tasks.count { it.isCompleted }
-}
-
-@OptIn(ExperimentalCoroutinesApi::class)
-class DailySummaryViewModel(
-    private val repository: DailyLogRepository,
-    private val clock: Clock,
-    initialDate: LocalDate = LocalDate.now(clock),
-) : ViewModel() {
-    private val selectedDate = MutableStateFlow(initialDate)
-    private val notice = MutableStateFlow<String?>(null)
-    val today: LocalDate = LocalDate.now(clock)
-
-    val uiState: StateFlow<DailySummaryUiState> = selectedDate.flatMapLatest { day ->
-        combine(
-            repository.observeTasks(day),
-            repository.observeSummary(day),
-            notice,
-        ) { tasks, summary, message ->
-            DailySummaryUiState(
-                date = day,
-                tasks = tasks,
-                summary = summary.orEmpty(),
-                notice = message,
-                isLoading = false,
-            )
-        }
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = DailySummaryUiState(date = initialDate),
-    )
-
-    fun setDate(date: LocalDate) {
-        selectedDate.value = date.coerceAtMost(today)
-    }
-
-    fun previousDay() = setDate(selectedDate.value.minusDays(1))
-
-    fun nextDay() {
-        if (selectedDate.value < today) setDate(selectedDate.value.plusDays(1))
-    }
-
-    fun save(content: String) {
-        viewModelScope.launch {
-            runCatching { repository.saveSummary(selectedDate.value, content) }
-                .onSuccess { notice.value = "已保存" }
-                .onFailure { notice.value = it.message ?: "保存失败，请重试" }
-        }
-    }
-
-    fun clearNotice() {
-        notice.value = null
-    }
-
-    fun consumeNotice() {
-        notice.value = null
-    }
 }
 
 // ---------------- 娱乐时间 ----------------

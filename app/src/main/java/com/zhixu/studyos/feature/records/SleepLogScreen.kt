@@ -234,7 +234,7 @@ private fun SleepRow(
                     fontWeight = FontWeight.SemiBold,
                 )
                 Text(
-                    text = "${timeOf(record.bedAt, zone)} 入睡 · ${timeOf(record.wakeAt, zone)} 起床",
+                    text = "${timeOf(record.bedAt, zone)} 放下手机 · ${timeOf(record.wakeAt, zone)} 起床",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -299,7 +299,7 @@ private fun SleepEditorDialog(
                     OutlinedTextField(
                         value = bedInput,
                         onValueChange = { bedInput = it.take(5) },
-                        label = { Text("入睡") },
+                        label = { Text("放下手机") },
                         singleLine = true,
                         modifier = Modifier
                             .weight(1f)
@@ -308,7 +308,7 @@ private fun SleepEditorDialog(
                     OutlinedTextField(
                         value = wakeInput,
                         onValueChange = { wakeInput = it.take(5) },
-                        label = { Text("起床") },
+                        label = { Text("早上起床") },
                         singleLine = true,
                         modifier = Modifier
                             .weight(1f)
@@ -316,7 +316,7 @@ private fun SleepEditorDialog(
                     )
                 }
                 Text(
-                    text = "时间用 24 小时制；日期填起床那天。",
+                    text = "只记两个时间：放下手机、早上起床；日期填起床那天。",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

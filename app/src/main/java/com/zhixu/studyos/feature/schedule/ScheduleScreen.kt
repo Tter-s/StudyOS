@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.ChevronLeft
 import androidx.compose.material.icons.rounded.ChevronRight
@@ -51,6 +52,7 @@ import com.zhixu.studyos.core.model.ScheduleItemType
 fun ScheduleScreen(
     viewModel: ScheduleViewModel,
     importViewModel: ScheduleImportViewModel,
+    onBack: (() -> Unit)? = null,
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -79,6 +81,7 @@ fun ScheduleScreen(
     Box(modifier = Modifier.fillMaxSize()) {
         ScheduleContent(
             state = state,
+            onBack = onBack,
             onPreviousWeek = viewModel::previousWeek,
             onNextWeek = viewModel::nextWeek,
             onCurrentWeek = viewModel::goToCurrentWeek,
@@ -251,6 +254,7 @@ fun ScheduleScreen(
 @Composable
 private fun ScheduleContent(
     state: ScheduleUiState,
+    onBack: (() -> Unit)?,
     onPreviousWeek: () -> Unit,
     onNextWeek: () -> Unit,
     onCurrentWeek: () -> Unit,
@@ -273,10 +277,21 @@ private fun ScheduleContent(
     ) {
         var menuExpanded by remember { mutableStateOf(false) }
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            if (onBack != null) {
+                IconButton(
+                    onClick = onBack,
+                    modifier = Modifier.testTag("course_manager_back"),
+                ) {
+                    Icon(
+                        Icons.AutoMirrored.Rounded.ArrowBack,
+                        contentDescription = "返回时间分布",
+                    )
+                }
+            }
             Column(modifier = Modifier.weight(1f)) {
-                Text("课表", style = MaterialTheme.typography.headlineSmall)
+                Text("课程管理", style = MaterialTheme.typography.headlineSmall)
                 Text(
-                    "查看每周课程，点击课程可编辑。",
+                    "查看每周课程、导入课表，点击课程可编辑。",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

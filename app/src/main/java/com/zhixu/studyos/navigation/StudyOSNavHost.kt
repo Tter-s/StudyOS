@@ -1,8 +1,10 @@
 package com.zhixu.studyos.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -17,8 +19,6 @@ import com.zhixu.studyos.feature.finance.FinanceHomeScreen
 import com.zhixu.studyos.feature.finance.FinanceViewModel
 import com.zhixu.studyos.feature.profile.MineScreen
 import com.zhixu.studyos.feature.profile.MineViewModel
-import com.zhixu.studyos.feature.records.DailySummaryScreen
-import com.zhixu.studyos.feature.records.DailySummaryViewModel
 import com.zhixu.studyos.feature.records.EntertainmentScreen
 import com.zhixu.studyos.feature.records.EntertainmentViewModel
 import com.zhixu.studyos.feature.records.HistoryScreen
@@ -27,6 +27,7 @@ import com.zhixu.studyos.feature.records.RecordsHubViewModel
 import com.zhixu.studyos.feature.records.RecordsScreen
 import com.zhixu.studyos.feature.records.SleepLogScreen
 import com.zhixu.studyos.feature.records.SleepLogViewModel
+import com.zhixu.studyos.feature.schedule.ScheduleDistributionScreen
 import com.zhixu.studyos.feature.schedule.ScheduleImportViewModel
 import com.zhixu.studyos.feature.schedule.ScheduleScreen
 import com.zhixu.studyos.feature.schedule.ScheduleViewModel
@@ -37,13 +38,12 @@ import java.time.LocalDate
 
 object StudyOSRoutes {
     const val DAY = "day/{date}"
-    const val SUMMARY = "records/summary?date={date}"
+    const val SCHEDULE_MANAGER = "schedule/manage"
     const val SLEEP = "records/sleep"
     const val ENTERTAINMENT = "records/entertainment"
     const val HISTORY = "records/history"
 
     fun day(date: LocalDate): String = "day/$date"
-    fun summary(date: LocalDate): String = "records/summary?date=$date"
 }
 
 @Composable
@@ -116,12 +116,35 @@ fun StudyOSNavHost(
                     initializer {
                         ScheduleViewModel(
                             repository = container.scheduleRepository,
+                            dailyLogRepository = container.dailyLogRepository,
+                            clock = container.clock,
+                        )
+                    }
+                },
+            )
+            val state by scheduleViewModel.uiState.collectAsStateWithLifecycle()
+            ScheduleDistributionScreen(
+                state = state,
+                onOpenManager = { navController.navigate(StudyOSRoutes.SCHEDULE_MANAGER) },
+                onRetry = scheduleViewModel::retry,
+            )
+        }
+
+        composable(StudyOSRoutes.SCHEDULE_MANAGER) {
+            val scheduleViewModel: ScheduleViewModel = viewModel(
+                key = "schedule-manager",
+                factory = viewModelFactory {
+                    initializer {
+                        ScheduleViewModel(
+                            repository = container.scheduleRepository,
+                            dailyLogRepository = container.dailyLogRepository,
                             clock = container.clock,
                         )
                     }
                 },
             )
             val importViewModel: ScheduleImportViewModel = viewModel(
+                key = "schedule-import",
                 factory = viewModelFactory {
                     initializer {
                         ScheduleImportViewModel(
@@ -135,6 +158,7 @@ fun StudyOSNavHost(
             ScheduleScreen(
                 viewModel = scheduleViewModel,
                 importViewModel = importViewModel,
+                onBack = { navController.popBackStack() },
             )
         }
 
@@ -152,43 +176,9 @@ fun StudyOSNavHost(
             )
             RecordsScreen(
                 viewModel = viewModel,
-                onOpenSummary = {
-                    navController.navigate(StudyOSRoutes.summary(LocalDate.now(container.clock)))
-                },
                 onOpenSleep = { navController.navigate(StudyOSRoutes.SLEEP) },
                 onOpenEntertainment = { navController.navigate(StudyOSRoutes.ENTERTAINMENT) },
                 onOpenHistory = { navController.navigate(StudyOSRoutes.HISTORY) },
-            )
-        }
-
-        composable(
-            route = StudyOSRoutes.SUMMARY,
-            arguments = listOf(
-                navArgument("date") {
-                    type = NavType.StringType
-                    defaultValue = ""
-                },
-            ),
-        ) { entry ->
-            val date = remember(entry.arguments?.getString("date")) {
-                runCatching { LocalDate.parse(entry.arguments?.getString("date")) }
-                    .getOrDefault(LocalDate.now(container.clock))
-            }
-            val viewModel: DailySummaryViewModel = viewModel(
-                key = "summary-$date",
-                factory = viewModelFactory {
-                    initializer {
-                        DailySummaryViewModel(
-                            repository = container.dailyLogRepository,
-                            clock = container.clock,
-                            initialDate = date,
-                        )
-                    }
-                },
-            )
-            DailySummaryScreen(
-                viewModel = viewModel,
-                onBack = { navController.popBackStack() },
             )
         }
 
@@ -240,7 +230,7 @@ fun StudyOSNavHost(
             HistoryScreen(
                 viewModel = viewModel,
                 onOpenDay = { date ->
-                    navController.navigate(StudyOSRoutes.summary(date))
+                    navController.navigate(StudyOSRoutes.day(date))
                 },
                 onBack = { navController.popBackStack() },
             )

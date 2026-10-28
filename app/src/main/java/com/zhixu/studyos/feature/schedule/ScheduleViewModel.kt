@@ -2,10 +2,12 @@ package com.zhixu.studyos.feature.schedule
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.zhixu.studyos.core.data.repository.DailyLogRepository
 import com.zhixu.studyos.core.data.repository.ScheduleRepository
 import com.zhixu.studyos.core.model.Course
 import com.zhixu.studyos.core.model.CourseException
 import com.zhixu.studyos.core.model.CourseExceptionType
+import com.zhixu.studyos.core.model.DailyTask
 import com.zhixu.studyos.core.model.DaySchedule
 import com.zhixu.studyos.core.model.OneOffEvent
 import com.zhixu.studyos.core.model.RoutineBlock
@@ -34,6 +36,7 @@ data class ScheduleUiState(
     val snapshot: ScheduleSnapshot = ScheduleSnapshot(),
     val selectedWeek: Int = 1,
     val weekDays: List<DaySchedule> = emptyList(),
+    val todayTasks: List<DailyTask> = emptyList(),
     val errorMessage: String? = null,
     val notice: String? = null,
 )
@@ -46,6 +49,7 @@ private data class SnapshotLoad(
 @OptIn(ExperimentalCoroutinesApi::class)
 class ScheduleViewModel(
     private val repository: ScheduleRepository,
+    private val dailyLogRepository: DailyLogRepository,
     private val clock: Clock,
 ) : ViewModel() {
     private val refresh = MutableStateFlow(0)
@@ -58,11 +62,16 @@ class ScheduleViewModel(
             .catch { emit(SnapshotLoad(errorMessage = "无法读取课表数据，请重试。")) }
     }
 
+    private val todayTasksFlow = dailyLogRepository
+        .observeTasks(LocalDate.now(clock))
+        .catch { emit(emptyList()) }
+
     val uiState: StateFlow<ScheduleUiState> = combine(
         snapshotLoad,
         requestedWeek,
         notice,
-    ) { load, weekRequest, operationNotice ->
+        todayTasksFlow,
+    ) { load, weekRequest, operationNotice, tasks ->
         val semester = load.snapshot.semester
         val currentWeek = semester?.let {
             val today = LocalDate.now(clock.withZone(it.zoneId))
@@ -79,6 +88,7 @@ class ScheduleViewModel(
             snapshot = load.snapshot,
             selectedWeek = selectedWeek,
             weekDays = days,
+            todayTasks = tasks,
             errorMessage = load.errorMessage,
             notice = operationNotice,
         )

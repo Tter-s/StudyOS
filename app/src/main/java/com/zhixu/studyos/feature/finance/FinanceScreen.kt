@@ -20,8 +20,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChevronLeft
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.ErrorOutline
+import androidx.compose.material.icons.rounded.PieChart
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -75,6 +77,7 @@ fun FinanceScreen(viewModel: FinanceViewModel) {
     var deletingTransaction by remember { mutableStateOf<FinanceTransaction?>(null) }
     var showBudgetEditor by remember { mutableStateOf(false) }
     var showCategoryEditor by remember { mutableStateOf(false) }
+    var showPieChart by remember { mutableStateOf(false) }
     var renamingCategory by remember { mutableStateOf<FinanceCategory?>(null) }
     var settingCategoryBudget by remember { mutableStateOf<FinanceCategory?>(null) }
     var deletingCategory by remember { mutableStateOf<FinanceCategory?>(null) }
@@ -247,11 +250,32 @@ fun FinanceScreen(viewModel: FinanceViewModel) {
                 }
             }
         }
+        if (section == FinanceSection.RECORDS && !state.isLoading && state.errorMessage == null) {
+            FloatingActionButton(
+                onClick = { showPieChart = true },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(20.dp)
+                    .testTag("finance_pie_entry"),
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+            ) {
+                Icon(Icons.Rounded.PieChart, contentDescription = "支出分类饼图")
+            }
+        }
         SnackbarHost(
             hostState = snackbarHostState,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(16.dp),
+        )
+    }
+
+    if (showPieChart) {
+        CategoryPieChartDialog(
+            breakdown = state.categoryBreakdown,
+            monthLabel = formatFinanceMonth(state.selectedMonth),
+            onDismiss = { showPieChart = false },
         )
     }
 

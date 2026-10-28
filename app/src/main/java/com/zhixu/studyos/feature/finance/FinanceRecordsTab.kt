@@ -1,5 +1,6 @@
 package com.zhixu.studyos.feature.finance
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -16,12 +17,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ReceiptLong
 import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -33,8 +35,12 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -48,6 +54,7 @@ import com.zhixu.studyos.core.model.BudgetStatus
 import com.zhixu.studyos.core.model.FinanceTransaction
 import com.zhixu.studyos.core.model.FinanceTransactionType
 import com.zhixu.studyos.core.model.MonthFinanceSummary
+import java.time.LocalDate
 
 @Composable
 fun FinanceRecordsTab(
@@ -64,11 +71,12 @@ fun FinanceRecordsTab(
     onExportBackup: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val expandedDays = remember { mutableStateMapOf<LocalDate, Boolean>() }
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
             .testTag("finance_records"),
-        contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 24.dp),
+        contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 96.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         state.summary?.let { summary ->
@@ -134,25 +142,28 @@ fun FinanceRecordsTab(
                 )
             }
         } else {
-            itemsIndexed(
-                items = state.transactions,
-                key = { _, transaction -> transaction.id },
-            ) { index, transaction ->
-                val previous = state.transactions.getOrNull(index - 1)
-                Column {
-                    if (previous == null || previous.date != transaction.date) {
-                        Text(
-                            text = dateHeader(transaction.date, includeYear = state.searchAllMonths),
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(top = 6.dp, bottom = 6.dp),
+            val forceExpand = state.searchQuery.isNotBlank() ||
+                state.filter != FinanceTransactionFilter.ALL
+            state.transactions.groupBy { it.date }.forEach { (date, dayTransactions) ->
+                val expanded = forceExpand || expandedDays[date] == true
+                item(key = "day-$date") {
+                    DayGroupHeader(
+                        date = date,
+                        transactions = dayTransactions,
+                        includeYear = state.searchAllMonths,
+                        expanded = expanded,
+                        onToggle = { expandedDays[date] = !expanded },
+                    )
+                }
+                if (expanded) {
+                    items(items = dayTransactions, key = { it.id }) { transaction ->
+                        TransactionRow(
+                            transaction = transaction,
+                            categoryName = state.categories
+                                .firstOrNull { it.id == transaction.categoryId }?.name,
+                            onClick = { onEdit(transaction) },
                         )
                     }
-                    TransactionRow(
-                        transaction = transaction,
-                        categoryName = state.categories.firstOrNull { it.id == transaction.categoryId }?.name,
-                        onClick = { onEdit(transaction) },
-                    )
                 }
             }
         }
@@ -373,6 +384,73 @@ fun BudgetStatusBadge(status: BudgetStatus, atLimit: Boolean = false) {
             .background(background, MaterialTheme.shapes.small)
             .padding(horizontal = 10.dp, vertical = 5.dp),
     )
+}
+
+@Composable
+private fun DayGroupHeader(
+    date: LocalDate,
+    transactions: List<FinanceTransaction>,
+    includeYear: Boolean,
+    expanded: Boolean,
+    onToggle: () -> Unit,
+) {
+    val expenseFen = transactions
+        .filter { it.type == FinanceTransactionType.EXPENSE }
+        .sumOf { it.amountFen }
+    val incomeFen = transactions
+        .filter { it.type == FinanceTransactionType.INCOME }
+        .sumOf { it.amountFen }
+    val arrowRotation by animateFloatAsState(
+        targetValue = if (expanded) 180f else 0f,
+        label = "financeDayArrow",
+    )
+    AppCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onToggle)
+            .testTag("finance_day_${date}"),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = dateHeader(date, includeYear),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                Text(
+                    text = buildString {
+                        append("${transactions.size} 笔")
+                        if (incomeFen > 0L) {
+                            append(" · 收入 +")
+                            append(Money.formatFen(incomeFen))
+                        }
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Column(horizontalAlignment = Alignment.End) {
+                Text(
+                    text = "支出",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    text = Money.formatFen(expenseFen),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+            }
+            Icon(
+                imageVector = Icons.Rounded.ExpandMore,
+                contentDescription = if (expanded) "收起当天记录" else "展开当天记录",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier
+                    .padding(start = 6.dp)
+                    .rotate(arrowRotation),
+            )
+        }
+    }
 }
 
 @Composable

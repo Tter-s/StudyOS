@@ -71,10 +71,16 @@ class StudyOSNavigationTest {
     @Test
     fun schedule_canOpenImageImportDialog() {
         composeRule.onNodeWithTag("nav_schedule").performClick()
-        composeRule.waitUntil(timeoutMillis = 5_000) {
-            runCatching { composeRule.onNodeWithTag("schedule_more").assertExists() }.isSuccess
+        composeRule.waitUntil(timeoutMillis = 10_000) {
+            runCatching { composeRule.onNodeWithTag("distribution_more").assertExists() }.isSuccess
         }
 
+        composeRule.onNodeWithTag("distribution_more").performClick()
+        composeRule.onNodeWithTag("open_course_manager").performClick()
+
+        composeRule.waitUntil(timeoutMillis = 10_000) {
+            runCatching { composeRule.onNodeWithTag("schedule_more").assertExists() }.isSuccess
+        }
         composeRule.onNodeWithTag("schedule_more").performClick()
         composeRule.onNodeWithTag("import_schedule").performClick()
 
@@ -106,42 +112,38 @@ class StudyOSNavigationTest {
     }
 
     @Test
-    fun records_openSummarySleepEntertainmentAndHistory() {
+    fun records_openSleepEntertainmentAndHistory() {
         composeRule.onNodeWithTag("nav_records").performClick()
 
-        composeRule.onNodeWithTag("records_summary").performClick()
-        composeRule.onNodeWithTag("screen_daily_summary").assertIsDisplayed()
-        composeRule.onNodeWithTag("summary_input").performScrollTo().assertIsDisplayed()
-        composeRule.activityRule.scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
+        composeRule.onNodeWithTag("records_progress").assertIsDisplayed()
 
-        composeRule.onNodeWithTag("records_sleep").performClick()
+        composeRule.onNodeWithTag("records_sleep").performScrollTo().performClick()
         composeRule.onNodeWithTag("screen_sleep").assertIsDisplayed()
         composeRule.onNodeWithTag("sleep_add").assertIsDisplayed()
         composeRule.activityRule.scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
 
-        composeRule.onNodeWithTag("records_entertainment").performClick()
+        composeRule.onNodeWithTag("records_entertainment").performScrollTo().performClick()
         composeRule.onNodeWithTag("screen_entertainment").assertIsDisplayed()
         composeRule.onNodeWithTag("entertainment_save").assertIsDisplayed()
         composeRule.activityRule.scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
 
-        composeRule.onNodeWithTag("records_history").performClick()
+        composeRule.onNodeWithTag("records_history").performScrollTo().performClick()
         composeRule.onNodeWithTag("screen_history").assertIsDisplayed()
     }
 
     @Test
-    fun records_canSaveDailySummary() {
-        val text = "今天完成了 V3.1 的记录页面"
-        composeRule.onNodeWithTag("nav_records").performClick()
-        composeRule.onNodeWithTag("records_summary").performClick()
-        composeRule.onNodeWithTag("summary_input").performScrollTo().performTextInput(text)
-        composeRule.onNodeWithTag("summary_save").performScrollTo().performClick()
-
+    fun schedule_showsTodayDistribution() {
+        composeRule.onNodeWithTag("nav_schedule").performClick()
+        composeRule.onNodeWithTag("screen_schedule").assertIsDisplayed()
         composeRule.waitUntil(timeoutMillis = 10_000) {
             runCatching {
-                composeRule.onNodeWithTag("summary_notice").performScrollTo().assertExists()
+                composeRule.onNodeWithTag("screen_time_distribution").assertExists()
             }.isSuccess
         }
-        composeRule.onNodeWithText("已保存").assertExists()
+        composeRule.onNodeWithTag("screen_time_distribution").assertIsDisplayed()
+        composeRule.onNodeWithTag("distribution_block_360").assertExists()
+        composeRule.onNodeWithTag("distribution_block_720").assertExists()
+        composeRule.onNodeWithTag("distribution_block_1080").assertExists()
     }
 
     @Test
